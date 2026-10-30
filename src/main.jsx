@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './style.css';
+import mainImage from '../main_image.jpg';
 
 const stoneTypes = [
   { name: '2 Stones', rate: 100 }, { name: '3 Stones', rate: 150 },
@@ -61,7 +62,7 @@ function App() {
     <main className="min-h-screen bg-gradient-to-br from-slate-200 to-slate-50 px-3 py-4 sm:px-6 sm:py-6">
       <div className="mx-auto max-w-5xl">
         <div className="mb-5 text-center">
-          <img className="mx-auto h-36 w-full max-w-[250px] sm:h-40 rounded-xl border-[3px] border-[#245a87] object-cover" src="/main_image.jpg" alt="Stone Photo" />
+          <img className="mx-auto h-36 w-full max-w-[250px] sm:h-40 rounded-xl border-[3px] border-[#245a87] object-cover" src={mainImage} alt="Stone Photo" />
         </div>
         <section className="rounded-xl bg-white p-4 shadow-lg sm:p-7">
           <h1 className="text-center text-xl leading-tight font-bold text-[#173d67] sm:text-3xl">🪨 PANDI STONE ENTERPRISES</h1>
