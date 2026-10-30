@@ -1,0 +1,17 @@
+﻿@import "tailwindcss";
+
+:root { font-family: Arial, sans-serif; color: #172033; font-synthesis: none; text-rendering: optimizeLegibility; }
+body { margin: 0; min-width: 320px; }
+.field { display: block; width: 100%; box-sizing: border-box; border: 1px solid #aab8c7; border-radius: 5px; padding: 9px; background: white; }
+.number-field { width: 75px; max-width: 100%; border: 1px solid #aab8c7; border-radius: 5px; padding: 8px 4px; text-align: center; background: white; }
+.cell { border: 1px solid #cbd5e1; padding: 10px 5px; }
+.action { border: 0; border-radius: 6px; background: #245a87; color: white; padding: 12px 16px; cursor: pointer; }
+.action:hover { background: #173d67; }
+@media print {
+  @page { margin: 14mm; }
+  body { background: white; }
+  main { min-height: 0 !important; padding: 0 !important; background: white !important; }
+  section { box-shadow: none !important; }
+  input { border-color: transparent !important; padding-left: 0 !important; }
+  .number-field { width: 64px; }
+}
