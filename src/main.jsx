@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './style.css';
 
@@ -22,11 +22,13 @@ function App() {
   const [billDate, setBillDate] = useState(today);
   const [rows, setRows] = useState(initialRows);
   const [paid, setPaid] = useState('0');
+  const [oldDebt, setOldDebt] = useState('0');
   const [error, setError] = useState('');
 
   const total = rows.reduce((sum, row) => sum + (Number(row.rate) || 0) * (Number(row.qty) || 0), 0);
-  const balance = total - (Number(paid) || 0);
-  const status = balance > 0 ? 'Payment status: Balance due' : balance < 0 ? 'Payment status: Excess amount paid' : total === 0 ? 'Payment status: No order' : 'Payment status: Paid in full';
+  const payableTotal = total + (Number(oldDebt) || 0);
+  const balance = payableTotal - (Number(paid) || 0);
+  const status = balance > 0 ? 'Payment status: Balance due' : balance < 0 ? 'Payment status: Excess amount paid' : payableTotal === 0 ? 'Payment status: No order' : 'Payment status: Paid in full';
 
   function updateRow(index, key, value) {
     setRows((current) => current.map((row, i) => i === index ? { ...row, [key]: value } : row));
@@ -35,6 +37,7 @@ function App() {
   function calculateBill() {
     const invalidRow = rows.some((row) => row.rate === '' || row.qty === '' || !Number.isFinite(Number(row.rate)) || !Number.isFinite(Number(row.qty)) || Number(row.rate) < 0 || Number(row.qty) < 0);
     if (invalidRow) { setError('Enter a valid rate and quantity for every stone type.'); return null; }
+    if (oldDebt === '' || !Number.isFinite(Number(oldDebt)) || Number(oldDebt) < 0) { setError('Enter a valid previous balance.'); return null; }
     if (paid === '' || !Number.isFinite(Number(paid)) || Number(paid) < 0) { setError('Enter a valid paid amount.'); return null; }
     setError('');
     return total;
@@ -49,18 +52,19 @@ function App() {
     setCustomer('');
     setBillNo(String(Date.now()).slice(-6));
     setPaid('0');
+    setOldDebt('0');
     setRows((current) => current.map((row) => ({ ...row, qty: 0 })));
     setError('');
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-200 to-slate-50 px-4 py-6 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-slate-200 to-slate-50 px-3 py-4 sm:px-6 sm:py-6">
       <div className="mx-auto max-w-5xl">
         <div className="mb-5 text-center">
-          <img className="mx-auto h-40 w-[250px] rounded-xl border-[3px] border-[#245a87] object-cover" src="/stones.jpg" alt="Stone Photo" />
+          <img className="mx-auto h-36 w-full max-w-[250px] sm:h-40 rounded-xl border-[3px] border-[#245a87] object-cover" src="/main_image.jpg" alt="Stone Photo" />
         </div>
-        <section className="rounded-xl bg-white p-5 shadow-lg sm:p-7">
-          <h1 className="text-center text-2xl font-bold text-[#173d67] sm:text-3xl">🪨 PANDI STONE ENTERPRISES</h1>
+        <section className="rounded-xl bg-white p-4 shadow-lg sm:p-7">
+          <h1 className="text-center text-xl leading-tight font-bold text-[#173d67] sm:text-3xl">🪨 PANDI STONE ENTERPRISES</h1>
           <h3 className="mb-6 mt-2 text-center text-lg font-semibold text-slate-700">கல் விற்பனை பில்</h3>
           <div className="grid gap-4 sm:grid-cols-3">
             <label className="block text-sm font-medium text-slate-700">வாடிக்கையாளர் பெயர்
@@ -75,26 +79,29 @@ function App() {
           </div>
           <h2 className="mb-3 mt-7 text-xl font-bold text-[#245a87]">கல் விவரங்கள்</h2>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px] border-collapse text-center">
+            <table className="responsive-table w-full min-w-[600px] border-collapse text-center">
               <thead><tr className="bg-[#245a87] text-white"><th className="cell">வ.எண்</th><th className="cell">கல் வகை</th><th className="cell">விலை ₹</th><th className="cell">அளவு</th><th className="cell">தொகை ₹</th></tr></thead>
               <tbody>{rows.map((row, index) => <tr className="even:bg-[#eef4fa]" key={row.name}>
-                <td className="cell">{index + 1}</td><td className="cell">{row.name}</td>
-                <td className="cell"><input aria-label={`${row.name} rate`} className="number-field" type="number" min="0" step="0.01" value={row.rate} onChange={(e) => updateRow(index, 'rate', e.target.value)} /></td>
-                <td className="cell"><input aria-label={`${row.name} quantity`} className="number-field" type="number" min="0" step="1" value={row.qty} onChange={(e) => updateRow(index, 'qty', e.target.value)} /></td>
-                <td className="cell">{money((Number(row.rate) || 0) * (Number(row.qty) || 0))}</td>
+                <td className="cell" data-label="No.">{index + 1}</td><td className="cell" data-label="Stone type">{row.name}</td>
+                <td className="cell" data-label="Rate"><input aria-label={`${row.name} rate`} className="number-field" type="number" min="0" step="0.01" value={row.rate} onChange={(e) => updateRow(index, 'rate', e.target.value)} /></td>
+                <td className="cell" data-label="Quantity"><input aria-label={`${row.name} quantity`} className="number-field" type="number" min="0" step="1" value={row.qty} onChange={(e) => updateRow(index, 'qty', e.target.value)} /></td>
+                <td className="cell" data-label="Amount">{money((Number(row.rate) || 0) * (Number(row.qty) || 0))}</td>
               </tr>)}</tbody>
             </table>
           </div>
-          <div className="my-5 rounded-lg bg-[#edf5fc] p-5 text-right">
+          <div className="my-5 rounded-lg bg-[#edf5fc] p-4 text-left sm:p-5 sm:text-right">
             <p className="mb-4 text-lg">மொத்த தொகை: <strong className="text-[#173d67]">{money(total)}</strong></p>
-            <label className="ml-auto flex max-w-sm items-center justify-end gap-3 font-medium">செலுத்திய தொகை ₹:
-              <input className="field max-w-40" type="number" min="0" value={paid} onChange={(e) => { setPaid(e.target.value); setError(''); }} />
+            <label className="payment-input flex w-full flex-col gap-2 font-medium sm:ml-auto sm:max-w-sm sm:flex-row sm:items-center sm:justify-end sm:gap-3">பழைய பற்று:
+              <input className="field w-full sm:max-w-40" type="number" min="0" step="0.01" value={oldDebt} onChange={(e) => { setOldDebt(e.target.value); setError(''); }} />
+            </label>
+            <label className="payment-input flex w-full flex-col gap-2 font-medium sm:ml-auto sm:max-w-sm sm:flex-row sm:items-center sm:justify-end sm:gap-3">செலுத்திய தொகை ₹:
+              <input className="field w-full sm:max-w-40" type="number" min="0" value={paid} onChange={(e) => { setPaid(e.target.value); setError(''); }} />
             </label>
             <p className="mt-4 text-lg">மீதித் தொகை: <strong className="text-[#173d67]">{balance < 0 ? `${money(Math.abs(balance))} முன்பணம்` : money(balance)}</strong></p>
             <p className="mt-2 font-semibold" aria-live="polite">{status}</p>
           </div>
           {error && <p className="mb-3 text-right text-sm font-medium text-red-700" role="alert">{error}</p>}
-          <div className="flex flex-wrap justify-center gap-2 print:hidden">
+          <div className="grid grid-cols-1 gap-2 print:hidden sm:flex sm:flex-wrap sm:justify-center">
             <button className="action" type="button" onClick={calculateBill}>கணக்கிடு</button>
             <button className="action" type="button" onClick={printBill}>பில் பிரிண்ட்</button>
             <button className="action" type="button" onClick={resetBill}>புதிய பில்</button>
@@ -107,4 +114,5 @@ function App() {
 }
 
 createRoot(document.getElementById('root')).render(<App />);
+
 

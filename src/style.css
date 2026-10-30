@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 :root { font-family: Arial, sans-serif; color: #172033; font-synthesis: none; text-rendering: optimizeLegibility; }
 body { margin: 0; min-width: 320px; }
@@ -14,4 +14,18 @@ body { margin: 0; min-width: 320px; }
   section { box-shadow: none !important; }
   input { border-color: transparent !important; padding-left: 0 !important; }
   .number-field { width: 64px; }
+}
+
+@media (max-width: 639px) {
+  .responsive-table { display: block; width: 100%; min-width: 0 !important; }
+  .responsive-table thead { display: none; }
+  .responsive-table tbody { display: grid; gap: 0.75rem; }
+  .responsive-table tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); overflow: hidden; border: 1px solid #cbd5e1; border-radius: 0.5rem; background: white; }
+  .responsive-table td { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 0.5rem; border: 0; border-bottom: 1px solid #e2e8f0; padding: 0.65rem; text-align: right; }
+  .responsive-table td::before { content: attr(data-label); color: #475569; font-size: 0.8rem; font-weight: 600; text-align: left; }
+  .responsive-table td:nth-child(1), .responsive-table td:nth-child(2), .responsive-table td:nth-child(5) { grid-column: 1 / -1; }
+  .responsive-table td:nth-child(2) { font-weight: 600; }
+  .responsive-table td:last-child { border-bottom: 0; }
+  .number-field { width: 88px; }
+  .payment-input input { max-width: none; }
 }
